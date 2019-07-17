@@ -40,11 +40,10 @@ public class Player : MonoBehaviour
     private float _deathValueX = 0.0001f;
     bool died = false;
 
+    CameraFollow cameraFollow;
+
     // casting stuff
     Vector2 castSize;
-
-    enum SpeedLevel { slow, medium, fast };
-    SpeedLevel speedLevel;
 
     public int bufferSize = 12;     //How many frames the input buffer keeps checking for new inputs / The Size of the Buffer
     public InputBufferItem[] inputBuffer;
@@ -55,14 +54,13 @@ public class Player : MonoBehaviour
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
 
-        //starts with medium speed
-        speedLevel = SpeedLevel.slow;
         //calculate gravity and velocity from wanted jump height and time to peak
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpPeak;
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
         baseGravity = gravity;
-    
+
+        cameraFollow = Camera.main.GetComponent<CameraFollow>();
 
         inputBuffer = new InputBufferItem[bufferSize];
         for (int i = 0; i < inputBuffer.Length; i++)
@@ -81,14 +79,6 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
 
-            //if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
-            //{
-            //    if (controller.collisions.below)
-            //    {
-            //        FastFallingJump();
-            //    }
-            //}
-
             UpdateBuffer();
             UpdateCommand();
 
@@ -102,23 +92,18 @@ public class Player : MonoBehaviour
             }
         }
 
-        //for test
-        if (!platformerMovement)
-            RunnerMovement();
-        else
-            StandartMovement();
-
-        velocity.y += gravity * Time.deltaTime;
-        oldPos = transform.position;
-
-        // moves player
-        controller.Move(velocity * Time.deltaTime);
+        StandartMovement();        
 
         if (!died)
         {
             //DoDangerAndPickup();
-            if (transform.position.x - oldPos.x < _deathValueX && velocity.y <= 0 && !won) Die();
+           // if (transform.position.x - oldPos.x < _deathValueX && velocity.y <= 0 && !won) Die();
         }
+    }
+
+    private void FixedUpdate()
+    {
+            
     }
 
     void UpdateBuffer()
@@ -150,47 +135,18 @@ public class Player : MonoBehaviour
         }
     }
 
-    void SpeedUp()
-    {
-        //TODO
-        //set rain vector
-        speedLevel++;
-       
-        anim.SetFloat("animSpeed", (float)speedLevel + 1);
-     
-    }
-
-    void SpeedDown()
-    {
-        //TODO
-        //set rain vector
-        speedLevel--;
-       
-        anim.SetFloat("animSpeed", (float)speedLevel + 1);
-       
-
-    }
-
     void StandartMovement()
     {
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         float targetVelocityX = input.x * moveSpeed;
+
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref movementSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeInAir);
 
-    }
-
-    void VariableJumping()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (controller.collisions.below)
-                velocity.y = maxJumpVelocity;
-        }
-        if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.UpArrow))
-        {
-            if (velocity.y > minJumpVelocity)
-                velocity.y = minJumpVelocity;
-        }
+        velocity.y += gravity * Time.deltaTime;
+        oldPos = transform.position;
+      
+        controller.Move(velocity * Time.deltaTime, cameraFollow);
+       
     }
 
     void FastFallingJump()
@@ -200,29 +156,10 @@ public class Player : MonoBehaviour
         float jumpHeight;
         float jumpDist;
 
-        switch (speedLevel)
-        {
-            case SpeedLevel.slow:
-                jumpHeight = minJumpHeight;
-                jumpDist = minJumpDist;
-                jumpVelocityX = minimumVelocity;
-                break;
-            case SpeedLevel.medium:
-                jumpHeight = medJumpHeight;
-                jumpDist = medJumpDist;
-                jumpVelocityX = (minimumVelocity + maximumVelocity) / 2;
-                break;
-            case SpeedLevel.fast:
-                jumpHeight = maxJumpHeight;
-                jumpDist = maxJumpDist;
-                jumpVelocityX = maximumVelocity;
-                break;
-            default:
-                jumpHeight = (minJumpHeight + maxJumpHeight) / 2;
-                jumpDist = (minJumpDist + minJumpDist) / 2;
-                jumpVelocityX = (minimumVelocity + maximumVelocity) / 2;
-                break;
-        }
+
+        jumpHeight = (minJumpHeight + maxJumpHeight) / 2;
+        jumpDist = (minJumpDist + maxJumpDist) / 2;
+        jumpVelocityX = 2;
 
         maxJumpVelocity = (2 * (jumpHeight * jumpVelocityX) / (jumpDist / 2));
         gravity = (-2 * jumpHeight * Mathf.Pow(jumpVelocityX, 2)) / Mathf.Pow((jumpDist / 2), 2);
@@ -233,63 +170,41 @@ public class Player : MonoBehaviour
 
     }
 
-    void RunnerMovement()
-    {
-        float targetVelocityX;
 
-        switch (speedLevel)
-        {
-            case SpeedLevel.slow:
-                targetVelocityX = minimumVelocity;
-                break;
-            case SpeedLevel.medium:
-                targetVelocityX = (minimumVelocity + maximumVelocity) / 2;
-                break;
-            case SpeedLevel.fast:
-                targetVelocityX = maximumVelocity;
-                break;
-            default:
-                targetVelocityX = velocity.x;
-                break;
-        }
+    //public void DoDangerAndPickup()
+    // {
+    //     RaycastHit2D[] hits = Physics2D.BoxCastAll(oldPos, castSize, 0f, velocity.normalized, velocity.magnitude * Time.fixedDeltaTime);
 
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref movementSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeInAir);
-    }
+    //     for (int i = 0; i < hits.Length; i++)
+    //     {
+    //         Pickup pickup = hits[i].collider.GetComponent<Pickup>();
+    //         if (pickup != null)
+    //         {
+    //             if (pickup.victoryPickup)
+    //             { 
+    //                 //win level
+    //                 won = true;
+    //                 platformerMovement = true;
+    //                 GameManager.GM.EndScreen(true);
+    //             }
+    //             GameManager.GM.currentScore += pickup.score;
+    //             pickup.Die();
+    //         }
 
-   //public void DoDangerAndPickup()
-   // {
-   //     RaycastHit2D[] hits = Physics2D.BoxCastAll(oldPos, castSize, 0f, velocity.normalized, velocity.magnitude * Time.fixedDeltaTime);
+    //         Danger danger = hits[i].collider.GetComponent<Danger>();
+    //         if (danger != null)
+    //         {
+    //             died = true;
+    //         }
+    //     }
 
-   //     for (int i = 0; i < hits.Length; i++)
-   //     {
-   //         Pickup pickup = hits[i].collider.GetComponent<Pickup>();
-   //         if (pickup != null)
-   //         {
-   //             if (pickup.victoryPickup)
-   //             { 
-   //                 //win level
-   //                 won = true;
-   //                 platformerMovement = true;
-   //                 GameManager.GM.EndScreen(true);
-   //             }
-   //             GameManager.GM.currentScore += pickup.score;
-   //             pickup.Die();
-   //         }
-
-   //         Danger danger = hits[i].collider.GetComponent<Danger>();
-   //         if (danger != null)
-   //         {
-   //             died = true;
-   //         }
-   //     }
-
-   //     if (died && !won) Die();
-   // }
+    //     if (died && !won) Die();
+    // }
 
     void Die()
     {
-       // controller.colliding = false;
-      //  GameManager.GM.EndScreen(false);
+        // controller.colliding = false;
+        //  GameManager.GM.EndScreen(false);
     }
 
     private IEnumerator DoFallJump()
