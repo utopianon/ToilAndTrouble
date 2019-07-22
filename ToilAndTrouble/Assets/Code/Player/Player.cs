@@ -16,10 +16,8 @@ public class Player : MonoBehaviour
     [Space(10f)]
     [SerializeField] private float moveSpeed = 6;
     [SerializeField] private float minJumpHeight = 1;
-    [SerializeField] private float medJumpHeight = 1;
     [SerializeField] private float maxJumpHeight = 4;
     [SerializeField] private float minJumpDist = 2;
-    [SerializeField] private float medJumpDist = 2;
     [SerializeField] private float maxJumpDist = 6;
     [SerializeField] private float timeToJumpPeak = .4f;
     [SerializeField] private float jumpFallModifier = 2;
@@ -28,6 +26,15 @@ public class Player : MonoBehaviour
     [SerializeField] private float minimumVelocity = 4;
     [SerializeField] private float maximumVelocity = 12;
 
+    public Vector2 wallJumpClimb;
+    public Vector2 wallJumpOff;
+    public Vector2 wallJumpLeap;
+    private bool wallSliding = false;
+    private int wallDirX;
+    public float wallSlideSpeedMax = 3;
+    public float wallStickTime = .25f;
+    public float timeToWallUnstick;
+
 
     private float gravity;
     private float baseGravity;
@@ -35,7 +42,7 @@ public class Player : MonoBehaviour
     private float maxJumpVelocity;
     private Vector3 velocity, oldPos;
     float movementSmoothing;
-    bool won = false;
+    private Vector2 input;
 
     private float _deathValueX = 0.0001f;
     bool died = false;
@@ -58,6 +65,7 @@ public class Player : MonoBehaviour
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpPeak;
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
+        print("Gravity: " + gravity + " Jump Velocity: " + maxJumpVelocity);
         baseGravity = gravity;
 
         cameraFollow = Camera.main.GetComponent<CameraFollow>();
@@ -72,38 +80,76 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (!died)
+        Debug.Log("gravity is " + gravity);
+        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        //wall direction for the type of wall jump
+        wallDirX = (controller.collisions.left) ? -1 : 1;
+
+        float targetVelocityX = input.x * moveSpeed;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref movementSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeInAir);
+
+        wallSliding = false;
+
+        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
-            if (controller.collisions.above || controller.collisions.below)
+            wallSliding = true;
+            //gravity = baseGravity;
+
+            if (velocity.y < -wallSlideSpeedMax && wallDirX == input.x)
             {
-                velocity.y = 0;
+                velocity.y = -wallSlideSpeedMax;
             }
 
-            UpdateBuffer();
-            UpdateCommand();
-
-            if (variableJumping)
+            if (timeToWallUnstick > 0)
             {
-                if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.UpArrow))
+                movementSmoothing = 0;
+                velocity.x = 0;
+
+                if (input.x != wallDirX && input.x != 0)
                 {
-                    if (velocity.y > (maxJumpVelocity / 2))
-                        velocity.y = (maxJumpVelocity / 2);
+                    timeToWallUnstick -= Time.deltaTime;
+                }
+                else
+                {
+                    timeToWallUnstick = wallStickTime;
                 }
             }
-        }
+            else
+            {
+                timeToWallUnstick = wallStickTime;
+            }
+        } 
 
-        StandartMovement();        
-
-        if (!died)
+        if (controller.collisions.above || controller.collisions.below)
         {
-            //DoDangerAndPickup();
-           // if (transform.position.x - oldPos.x < _deathValueX && velocity.y <= 0 && !won) Die();
+            velocity.y = 0;
         }
-    }
 
-    private void FixedUpdate()
-    {
-            
+        UpdateBuffer();
+        UpdateCommand();
+
+
+        if (variableJumping)
+        {
+            if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.UpArrow))
+            {
+                if (velocity.y > (maxJumpVelocity / 2))
+                    velocity.y = (maxJumpVelocity / 2);
+            }
+        }
+
+        if (!controller.collisions.below && !wallSliding && velocity.y < 0 && gravity == baseGravity)
+        {
+            gravity = gravity * jumpFallModifier;
+        }
+        else
+        {
+            gravity = baseGravity;
+        }
+
+        velocity.y += gravity * Time.deltaTime;
+        oldPos = transform.position;
+        StandartMovement();
     }
 
     void UpdateBuffer()
@@ -125,6 +171,27 @@ public class Player : MonoBehaviour
         {
             if (inputBuffer[i].CanExecute())
             {
+                if (wallSliding)
+                {
+                    if (wallDirX == input.x)
+                    {
+                        velocity.x = -wallDirX * wallJumpClimb.x;
+                        velocity.y = wallJumpClimb.y;
+                    }
+
+                    else if (input.x == 0)
+                    {
+                        velocity.x = -wallDirX * wallJumpOff.x;
+                        velocity.y = wallJumpOff.y;
+                    }
+
+                    else
+                    {
+                        velocity.x = -wallDirX * wallJumpLeap.x;
+                        velocity.y = wallJumpLeap.y;
+                    }
+                }
+
                 if (controller.collisions.below)
                 {
                     FastFallingJump();
@@ -137,37 +204,13 @@ public class Player : MonoBehaviour
 
     void StandartMovement()
     {
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        float targetVelocityX = input.x * moveSpeed;
-
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref movementSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeInAir);
-
-        velocity.y += gravity * Time.deltaTime;
-        oldPos = transform.position;
-      
-        controller.Move(velocity * Time.deltaTime, cameraFollow);
-       
+        controller.Move(velocity * Time.deltaTime);
     }
 
     void FastFallingJump()
     {
-        //calculate gravity and velocity from wanted jump height and distance
-        float jumpVelocityX;
-        float jumpHeight;
-        float jumpDist;
-
-
-        jumpHeight = (minJumpHeight + maxJumpHeight) / 2;
-        jumpDist = (minJumpDist + maxJumpDist) / 2;
-        jumpVelocityX = 2;
-
-        maxJumpVelocity = (2 * (jumpHeight * jumpVelocityX) / (jumpDist / 2));
-        gravity = (-2 * jumpHeight * Mathf.Pow(jumpVelocityX, 2)) / Mathf.Pow((jumpDist / 2), 2);
-        baseGravity = gravity;
-        timeToJumpPeak = (jumpDist / 2) / jumpVelocityX;
         velocity.y = maxJumpVelocity;
-        StartCoroutine(DoFallJump());
-
+     //   StartCoroutine(DoFallJump());
     }
 
 
