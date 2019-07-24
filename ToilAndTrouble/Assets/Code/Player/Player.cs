@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     public float wallStickTime = .25f;
     public float timeToWallUnstick;
 
+    public AttachPoint[] attachPoints = new AttachPoint[3];
 
     private float gravity;
     private float baseGravity;
@@ -60,6 +61,7 @@ public class Player : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
+        attachPoints = GetComponentsInChildren<AttachPoint>();
 
         //calculate gravity and velocity from wanted jump height and time to peak
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
@@ -80,7 +82,6 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        Debug.Log("gravity is " + gravity);
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         //wall direction for the type of wall jump
         wallDirX = (controller.collisions.left) ? -1 : 1;
@@ -200,7 +201,7 @@ public class Player : MonoBehaviour
                 }
             }
         }
-    }
+    } 
 
     void StandartMovement()
     {
