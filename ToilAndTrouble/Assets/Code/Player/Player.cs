@@ -56,12 +56,15 @@ public class Player : MonoBehaviour
     public int bufferSize = 12;     //How many frames the input buffer keeps checking for new inputs / The Size of the Buffer
     public InputBufferItem[] inputBuffer;
 
+    SpriteRenderer spriteRenderer;
+
     // Start is called before the first frame update
     void Start()
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
         attachPoints = GetComponentsInChildren<AttachPoint>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         //calculate gravity and velocity from wanted jump height and time to peak
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
@@ -150,6 +153,15 @@ public class Player : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         oldPos = transform.position;
+        if (controller.collisions.faceDir > 0)
+        {
+            spriteRenderer.flipX = true;
+        }
+        else
+        {
+            spriteRenderer.flipX = false;
+        }
+
         StandartMovement();
     }
 
