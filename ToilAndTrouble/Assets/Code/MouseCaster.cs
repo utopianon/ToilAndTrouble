@@ -22,7 +22,7 @@ public class MouseCaster : MonoBehaviour
 
             if (hit = Physics2D.GetRayIntersection(mainCamera.ScreenPointToRay(Input.mousePosition)))
             {
-                if (hit.transform.tag == "Grabbable")
+                if (hit.transform.tag == "Grabbable" || hit.transform.tag == "Ingredient")
                 hit.transform.GetComponent<GrabbableObject>().Grabbed();
             }
                 

@@ -26,6 +26,11 @@ public class GrabbableObject : MonoBehaviour
             transform.position = pointAttachedTo.transform.position;
         }
     }
+
+    public void BeCarried()
+    {
+        transform.position = pointAttachedTo.transform.position;
+    }
     public void Grabbed()
     {
         if (!grabbed)
@@ -78,7 +83,7 @@ public class GrabbableObject : MonoBehaviour
 
         RaycastHit2D hit;
         if (hit = Physics2D.Raycast((Vector2)transform.position + Vector2.down*collider.bounds.size.magnitude, Vector2.down))
-        {         
+        {           
             StartCoroutine(FallToGround(hit));
         }
 
@@ -89,10 +94,10 @@ public class GrabbableObject : MonoBehaviour
         float lerpTime = 0.15f;
         float timer = 0;
         float perc;
-        Vector2 endPos = groundHit.point;
-        endPos.y += (groundHit.collider.bounds.size.y/2) + (collider.bounds.size.y/2);
+        Vector2 endPos = groundHit.collider.bounds.center;
+        endPos.x = transform.position.x;       
+        endPos.y += (collider.bounds.size.y / 2) + (groundHit.collider.bounds.size.y/2);    
         Vector2 startPos = transform.position;
-
 
         while ((Vector2)transform.position != endPos)
         {
