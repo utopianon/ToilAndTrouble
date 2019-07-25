@@ -28,16 +28,13 @@ public class CameraFollow : MonoBehaviour
     private void Start()
     {
         focusArea = new FocusArea(target.collider.bounds, focusAreaSize);
-        
-        
         following = true;
         thisCamera = GetComponent<Camera>();
-    
-      
     }
 
     private void Update()
     {
+
         if (target.collisions.descendingSlope)
         {
             actualVerticalOffset = -4;
@@ -50,27 +47,36 @@ public class CameraFollow : MonoBehaviour
         {
             actualVerticalOffset = verticalOffset;
         }
-            focusArea.UpdateFocusArea(target.collider.bounds);
+
+
     }
+
     private void LateUpdate()
     {
         if (following)
         {
+            focusArea.UpdateFocusArea(target.collider.bounds);
 
-            Vector2 focusPosition = focusArea.centre + Vector2.up * actualVerticalOffset;
+            Vector2 focusPosition = focusArea.centre + Vector2.up * verticalOffset;
 
-            if (focusArea.velocity.x != 0)
-            {
-                lookAheadDirectionX = Mathf.Sign(focusArea.velocity.x);
-            }
-
-            targetLookAheadX = lookAheadDirectionX * lookAheadDistX;
-            currentLookAheadX = Mathf.SmoothDamp(currentLookAheadX, targetLookAheadX, ref smoothLookVelocityX, lookSmoothTimeX);
-
-            focusPosition.y = Mathf.SmoothDamp(transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
-            focusPosition += Vector2.right * currentLookAheadX;
             transform.position = (Vector3)focusPosition + Vector3.forward * -10;
-            targetPosInScreenSpace = thisCamera.WorldToScreenPoint(target.transform.position);          
+        //{
+        //    focusArea.UpdateFocusArea(target.collider.bounds);
+        //    Vector2 focusPosition = focusArea.centre + Vector2.up * actualVerticalOffset;
+
+        //    if (focusArea.velocity.x != 0)
+        //    {
+        //        lookAheadDirectionX = Mathf.Sign(focusArea.velocity.x);
+        //    }
+
+        //    targetLookAheadX = lookAheadDirectionX * lookAheadDistX;
+        //    currentLookAheadX = Mathf.SmoothDamp(currentLookAheadX, targetLookAheadX, ref smoothLookVelocityX, lookSmoothTimeX);
+
+        //    focusPosition.y = Mathf.SmoothDamp(transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
+        //    focusPosition += Vector2.right * currentLookAheadX;
+        //    transform.position = (Vector3)focusPosition + Vector3.forward * -10;
+        //    targetPosInScreenSpace = thisCamera.WorldToScreenPoint(target.transform.position);
+        //    Debug.Log("fOCUS aRea centre : " + focusArea.centre);
         }
     }
     private void OnDrawGizmos()
@@ -145,6 +151,7 @@ public class CameraFollow : MonoBehaviour
             }
             top += shiftY;
             bottom += shiftY;
+
             centre = new Vector2((left + right) / 2, (top + bottom) / 2);
             velocity = new Vector2(shiftX, shiftY);
 
