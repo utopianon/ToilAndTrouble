@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     private float maxJumpVelocity;
     private Vector3 velocity, oldPos;
     float movementSmoothing;
-    private Vector2 input;
+    private Vector2 input;    
 
     private float _deathValueX = 0.0001f;
     bool died = false;
