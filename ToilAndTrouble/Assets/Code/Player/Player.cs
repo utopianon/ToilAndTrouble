@@ -36,6 +36,10 @@ public class Player : MonoBehaviour
     public float timeToWallUnstick;
 
     public AttachPoint[] attachPoints = new AttachPoint[3];
+    public AttachPoint activeAttachPoint;
+    public bool holdingItem = false;
+    public int maxHeldItems = 3;
+    public int heldItems = 0;
 
     private float gravity;
     private float baseGravity;
@@ -65,6 +69,7 @@ public class Player : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         attachPoints = GetComponentsInChildren<AttachPoint>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        GameMaster.Instance.SetPlayer(this);
 
         //calculate gravity and velocity from wanted jump height and time to peak
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
@@ -74,6 +79,11 @@ public class Player : MonoBehaviour
         baseGravity = gravity;
 
         cameraFollow = Camera.main.GetComponent<CameraFollow>();
+
+        foreach (AttachPoint a in attachPoints)
+        {
+            a.Owner = this;
+        }
 
         inputBuffer = new InputBufferItem[bufferSize];
         for (int i = 0; i < inputBuffer.Length; i++)
@@ -155,11 +165,11 @@ public class Player : MonoBehaviour
         oldPos = transform.position;
         if (controller.collisions.faceDir > 0)
         {
-            spriteRenderer.flipX = true;
+            spriteRenderer.flipX = false;
         }
         else
         {
-            spriteRenderer.flipX = false;
+            spriteRenderer.flipX = true;
         }
 
         StandartMovement();

@@ -7,6 +7,8 @@ TagManager:
   - Grabbable
   - Ingredient
   - IngredientHolder
+  - GameMaster
+  - Score
   layers:
   - Default
   - TransparentFX
@@ -21,8 +23,8 @@ TagManager:
   - Grabbables
   - Grabbed
   - Platforms
-  - 
-  - 
+  - Enemy
+  - SpecialGround
   - 
   - 
   - 

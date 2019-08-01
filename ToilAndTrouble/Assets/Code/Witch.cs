@@ -6,8 +6,13 @@ public class Witch : MonoBehaviour
 {
     public Sprite[] possibleIngredients;
     List<Ingredient> ingredientsInScene;
+    int receivedIngredients = 0;
     GameObject wantedSign;
+    bool thinking = false;
     public IngredientType wantedIngredient;
+    bool receivingInmgredients;
+    public float comboTimer = 0.5f;
+    public int scorePerIngredient = 20;
 
     float timer;
 
@@ -45,14 +50,40 @@ public class Witch : MonoBehaviour
 
         if (collidingObject.tag == "Ingredient")
         {
-            if (collidingObject.GetComponent<Ingredient>().type == wantedIngredient)
+            Ingredient temp = collidingObject.GetComponent<Ingredient>();
+            if (temp.type == wantedIngredient && !temp.grabbed)
             {
+                receivedIngredients++;
+                ingredientsInScene.Remove(temp);
                 Destroy(collidingObject);
-                ChooseIngredient();
+                if (!thinking)
+                {                    
+                    thinking = true;
+                    StartCoroutine(NewIngredientTimer());
+                }
             }
         }
     }
 
+    public IEnumerator NewIngredientTimer()
+    {
+        yield return new WaitForSeconds(0.5f);
+        UseIngredients();
+        ChooseIngredient();
+    }
+
+    void UseIngredients()
+    {
+        float multiplier = 0.5f;
+
+        for (int i = receivedIngredients; i > 0; i--)
+        {
+            multiplier += 0.5f;           
+        }
+        GameMaster.Instance.AddScore(multiplier, receivedIngredients * scorePerIngredient);
+        Debug.Log("Multiplier is: " + multiplier + " ingredients received is: " + receivedIngredients);
+        receivedIngredients = 0;
+    }
     public void ChooseIngredient()
     {
         if (ingredientsInScene.Count > 0)
@@ -61,6 +92,7 @@ public class Witch : MonoBehaviour
             wantedIngredient = ingredientsInScene[index].type;
             ingredientsInScene.RemoveAt(index);
             wantedSign.GetComponent<SpriteRenderer>().sprite = possibleIngredients[(int)wantedIngredient];
+            thinking = false;
         }
         else
         {
