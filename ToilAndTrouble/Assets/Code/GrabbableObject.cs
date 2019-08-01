@@ -12,7 +12,7 @@ public class GrabbableObject : RaycastController
     public float distanceToGrab = 2f;
     public LayerMask playerMask;
     public LayerMask grabbablesMask;
-    public LayerMask collisionsMask;
+    public LayerMask excludeGrabbed;
     public CollisionInfo collisions;
     public float gravity;
     SpriteRenderer sprite;
@@ -21,9 +21,10 @@ public class GrabbableObject : RaycastController
 
     public override void Awake()
     {
-        sprite = GetComponent<SpriteRenderer>();
+        sprite = GetComponentInChildren<SpriteRenderer>();
         base.Awake();
     }
+
     private void LateUpdate()
     {
         if (grabbed && pointAttachedTo && !shaking)
@@ -38,6 +39,7 @@ public class GrabbableObject : RaycastController
     {
         transform.position = pointAttachedTo.transform.position;
     }
+
     public void Grabbed()
     {
         if (!grabbed)
@@ -47,11 +49,13 @@ public class GrabbableObject : RaycastController
             {
                 AttachPoint attachTo;
                 if (attachTo = (nearestAttachPoint(hit.transform.GetComponent<Player>()).Attach(this)))
-               {
+                {
                     grabbed = true;
                     gameObject.layer += 1;
                     StartCoroutine(AttachToPlayer(attachTo));
                 }
+                else
+                    StartCoroutine(FailGrab());
             }
             else
             {
@@ -91,7 +95,7 @@ public class GrabbableObject : RaycastController
     {
         bool canDrop = true;
         Collider2D[] hit = new Collider2D[2];
-        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size, 0, hit, LayerMask.NameToLayer("Grababbles")) > 0)
+        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size - new Vector3(0.1f, 0.1f, 0.1f), 0, hit, excludeGrabbed) > 0)
         {
 
             foreach (Collider2D h in hit)
@@ -110,7 +114,7 @@ public class GrabbableObject : RaycastController
             grabbed = false;
             pointAttachedTo.Detach(this);
             pointAttachedTo = null;
-            sprite.sortingOrder--;
+            sprite.sortingOrder++;
             gameObject.layer -= 1;
         }
         else
@@ -118,7 +122,16 @@ public class GrabbableObject : RaycastController
             StartCoroutine(FailDrop());
         }
 
-    }  
+    }
+
+    public void ForceDrop()
+    {
+        grabbed = false;       
+        pointAttachedTo = null;
+        sprite.sortingOrder++;
+        gameObject.layer -= 1;
+        FailDrop();
+    }
 
     public IEnumerator AttachToPlayer(AttachPoint attachPoint)
     {
@@ -128,7 +141,7 @@ public class GrabbableObject : RaycastController
         Vector2 endPos = attachPoint.FreeAttachPoint(this);
         yAttachModifier = endPos.y - attachPoint.transform.position.y;
         Vector2 startPos = transform.position;
-        sprite.sortingOrder++;
+        sprite.sortingOrder--;
 
 
         while (timer <= lerpTime)
@@ -216,7 +229,6 @@ public class GrabbableObject : RaycastController
         //    DescendSlope(ref velocity);
         //}
 
-
         if (velocity.y != 0)
             VerticalCollisions(ref velocity);
 
@@ -267,6 +279,7 @@ public class GrabbableObject : RaycastController
                 }
             }
         }
+
         if (collisions.climbingSlope)
         {
             //fixes stuter when climbing some curved slopes
