@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Witch : MonoBehaviour
 {
-    public Material[] possibleIngredients;
+    public Sprite[] possibleIngredients;
+    List<Ingredient> ingredientsInScene;
     GameObject wantedSign;
-    List<Ingredient> IngredientsInScene;
     public IngredientType wantedIngredient;
 
     float timer;
@@ -15,7 +15,9 @@ public class Witch : MonoBehaviour
     public void Start()
     {
         wantedSign = transform.GetChild(0).gameObject;
-        ChooseIngredient();    
+        LoadIngrediensInScene();
+        ChooseIngredient();
+
     }
 
     private void Update()
@@ -23,6 +25,17 @@ public class Witch : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             ChooseIngredient();
+        }
+    }
+
+    private void LoadIngrediensInScene()
+    {
+        GameObject holder = GameObject.FindGameObjectWithTag("IngredientHolder");
+        Ingredient[] ingredients = holder.GetComponentsInChildren<Ingredient>();
+        ingredientsInScene = new List<Ingredient>();
+        foreach (Ingredient i in ingredients)
+        {
+            ingredientsInScene.Add(i);
         }
     }
 
@@ -42,8 +55,19 @@ public class Witch : MonoBehaviour
 
     public void ChooseIngredient()
     {
-        wantedIngredient = Utility.RandomEnumValue<IngredientType>();
-        wantedSign.GetComponent<Renderer>().material = possibleIngredients[(int)wantedIngredient];
+        if (ingredientsInScene.Count > 0)
+        {
+            int index = Random.Range(0, ingredientsInScene.Count);
+            wantedIngredient = ingredientsInScene[index].type;
+            ingredientsInScene.RemoveAt(index);
+            wantedSign.GetComponent<SpriteRenderer>().sprite = possibleIngredients[(int)wantedIngredient];
+        }
+        else
+        {
+            //won scene
+            wantedSign.SetActive(false);
+            Debug.Log("won scene");
+        }
     }
 
 }
