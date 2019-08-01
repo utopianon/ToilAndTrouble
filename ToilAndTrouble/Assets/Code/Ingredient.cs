@@ -13,13 +13,7 @@ public enum IngredientType
     G,
     H,
     I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    O,
-    P
+    J
 }
 
 public class Ingredient : GrabbableObject

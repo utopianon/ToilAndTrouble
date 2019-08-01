@@ -47,10 +47,10 @@ public class Player : MonoBehaviour
     private float maxJumpVelocity;
     private Vector3 velocity, oldPos;
     float movementSmoothing;
-    private Vector2 input;    
+    private Vector2 input;
+    private bool stunned = false;
 
-    private float _deathValueX = 0.0001f;
-    bool died = false;
+    bool invincible = false;
 
     CameraFollow cameraFollow;
 
@@ -132,7 +132,7 @@ public class Player : MonoBehaviour
             {
                 timeToWallUnstick = wallStickTime;
             }
-        } 
+        }
 
         if (controller.collisions.above || controller.collisions.below)
         {
@@ -165,11 +165,11 @@ public class Player : MonoBehaviour
         oldPos = transform.position;
         if (controller.collisions.faceDir > 0)
         {
-            spriteRenderer.flipX = true;
+            spriteRenderer.flipX = false;
         }
         else
         {
-            spriteRenderer.flipX = false;
+            spriteRenderer.flipX = true;
         }
 
         StandartMovement();
@@ -223,54 +223,46 @@ public class Player : MonoBehaviour
                 }
             }
         }
-    } 
+    }
 
     void StandartMovement()
     {
+        if (stunned)
+            velocity = Vector2.zero;
         controller.Move(velocity * Time.deltaTime);
     }
 
     void FastFallingJump()
     {
         velocity.y = maxJumpVelocity;
-     //   StartCoroutine(DoFallJump());
+        //   StartCoroutine(DoFallJump());
     }
 
-
-    //public void DoDangerAndPickup()
-    // {
-    //     RaycastHit2D[] hits = Physics2D.BoxCastAll(oldPos, castSize, 0f, velocity.normalized, velocity.magnitude * Time.fixedDeltaTime);
-
-    //     for (int i = 0; i < hits.Length; i++)
-    //     {
-    //         Pickup pickup = hits[i].collider.GetComponent<Pickup>();
-    //         if (pickup != null)
-    //         {
-    //             if (pickup.victoryPickup)
-    //             { 
-    //                 //win level
-    //                 won = true;
-    //                 platformerMovement = true;
-    //                 GameManager.GM.EndScreen(true);
-    //             }
-    //             GameManager.GM.currentScore += pickup.score;
-    //             pickup.Die();
-    //         }
-
-    //         Danger danger = hits[i].collider.GetComponent<Danger>();
-    //         if (danger != null)
-    //         {
-    //             died = true;
-    //         }
-    //     }
-
-    //     if (died && !won) Die();
-    // }
-
-    void Die()
+    public void GetHit()
     {
-        // controller.colliding = false;
-        //  GameManager.GM.EndScreen(false);
+        if (!invincible)
+        {
+            invincible = true;
+            stunned = true;
+            spriteRenderer.color = Color.red;
+            StartCoroutine(InvincibilityFlash());    
+            if (heldItems >0)
+            {
+                GameMaster.Instance.witch.ChangeMind(activeAttachPoint.attachedItems);
+                activeAttachPoint.DropAndDestroy();
+            }
+            GameMaster.Instance.LoseScore(50);        
+            //drop and destroy what is holding
+        }
+    }
+
+    private IEnumerator InvincibilityFlash()
+    {
+        yield return new WaitForSeconds(0.1f);
+        stunned = false;
+        yield return new WaitForSeconds(0.15f);
+        spriteRenderer.color = Color.white;
+        invincible = false;
     }
 
     private IEnumerator DoFallJump()

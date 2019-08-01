@@ -39,7 +39,11 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("COLLISION WITH " + collision.gameObject);
+        Player temp;
+       if (temp = collision.gameObject.GetComponent<Player>())
+        {
+            temp.GetHit();
+        }
         
     }  
 

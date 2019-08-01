@@ -1,11 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameMaster : MonoBehaviour
 {
     public int score;
     private Player player;
+    public Text scoreText;
+    public Witch witch;
+
 
     private static GameMaster _instance;
     public static GameMaster Instance
@@ -27,6 +31,15 @@ public class GameMaster : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(this.gameObject);
         score = 0;
+        if (scoreText == null)
+        {            
+            scoreText = GameObject.FindGameObjectWithTag("Score").GetComponent<Text>();
+        }
+
+        if (witch == null)
+        {
+            witch = GameObject.FindGameObjectWithTag("Witch").GetComponent<Witch>();
+        }
     }
 
     private void Update()
@@ -43,6 +56,7 @@ public class GameMaster : MonoBehaviour
                 player.activeAttachPoint.attachedItems[0].Drop();
             }
         }
+        scoreText.text = score.ToString();
     }
 
     public void SetPlayer(Player _player)
@@ -55,6 +69,11 @@ public class GameMaster : MonoBehaviour
         int points = Mathf.CeilToInt(value * multiplier);
         score += points;
         Debug.Log("Score is: " + score);
+    }
+
+    public void LoseScore(int value)
+    {
+        score = (score - value < 0) ? 0 : score - value;
     }
 
     private void Reset()

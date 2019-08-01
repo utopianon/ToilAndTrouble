@@ -70,6 +70,12 @@ public class AttachPoint : MonoBehaviour
 
     }
 
+    public void DropAndDestroy()
+    {
+        unloading = true;
+        StartCoroutine(UnloadAndKill());
+    }
+
     public IEnumerator Unload()
     {
         GrabbableObject[] temp = attachedItems.ToArray();
@@ -79,5 +85,25 @@ public class AttachPoint : MonoBehaviour
         }
         unloading = false;        
         yield return null;
-    }    
+    }
+
+    public IEnumerator UnloadAndKill()
+    {
+        GrabbableObject[] temp = attachedItems.ToArray();
+        foreach (GrabbableObject i in temp)
+        {
+            attachedItems.Remove(i);
+            Owner.heldItems--;
+            i.ForceDrop();
+            yield return new WaitForSeconds(0.05f);
+        }
+        Owner.activeAttachPoint = null;
+        unloading = false;
+        yield return new WaitForSeconds(0.3f);
+
+        foreach (GrabbableObject i in temp)
+        {
+            Destroy(i.gameObject);
+        }
+    }
 }
