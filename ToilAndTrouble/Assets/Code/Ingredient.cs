@@ -7,13 +7,39 @@ public enum IngredientType
     A,
     B,
     C,
-    D
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P
 }
 
 public class Ingredient : GrabbableObject
-{
+{  
+    private Vector3 velocity;
 
-    public IngredientType type;
+    private void Update()
+    {
+        if (!grabbed)        {
+
+            if (collisions.above || collisions.below)
+            {
+                velocity.y = 0;
+            }
+
+            velocity.y += gravity * Time.deltaTime;
+            Move(velocity * Time.deltaTime);
+        }
+
+    }
 
 }
 

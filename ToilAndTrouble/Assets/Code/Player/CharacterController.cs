@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class CharacterController : RaycastController
 {
     [SerializeField] private float maxSlopeAngle = 80;
-    [SerializeField] private float maxDescendAngle = 75;
+    [SerializeField] private float maxDescendAngle = 75; 
 
     public CollisionInfo collisions;
 
@@ -15,7 +15,7 @@ public class CharacterController : RaycastController
     {
         base.Start();
 
-        collisions.faceDir = 1;
+        collisions.faceDir = -1;
     }
 
     public void Move(Vector3 velocity, bool standingOnPlatform = false)
