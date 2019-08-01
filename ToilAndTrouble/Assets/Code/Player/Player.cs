@@ -36,6 +36,10 @@ public class Player : MonoBehaviour
     public float timeToWallUnstick;
 
     public AttachPoint[] attachPoints = new AttachPoint[3];
+    public AttachPoint activeAttachPoint;
+    public bool holdingItem = false;
+    public int maxHeldItems = 3;
+    public int heldItems = 0;
 
     private float gravity;
     private float baseGravity;
@@ -74,6 +78,11 @@ public class Player : MonoBehaviour
         baseGravity = gravity;
 
         cameraFollow = Camera.main.GetComponent<CameraFollow>();
+
+        foreach (AttachPoint a in attachPoints)
+        {
+            a.Owner = this;
+        }
 
         inputBuffer = new InputBufferItem[bufferSize];
         for (int i = 0; i < inputBuffer.Length; i++)
