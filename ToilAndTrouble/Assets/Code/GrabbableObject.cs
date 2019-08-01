@@ -49,7 +49,7 @@ public class GrabbableObject : RaycastController
             {
                 AttachPoint attachTo;
                 if (attachTo = (nearestAttachPoint(hit.transform.GetComponent<Player>()).Attach(this)))
-               {
+                {
                     grabbed = true;
                     gameObject.layer += 1;
                     StartCoroutine(AttachToPlayer(attachTo));
@@ -95,7 +95,7 @@ public class GrabbableObject : RaycastController
     {
         bool canDrop = true;
         Collider2D[] hit = new Collider2D[2];
-        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size - new Vector3 (0.1f,0.1f,0.1f), 0, hit, excludeGrabbed) > 0)
+        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size - new Vector3(0.1f, 0.1f, 0.1f), 0, hit, excludeGrabbed) > 0)
         {
 
             foreach (Collider2D h in hit)
@@ -122,15 +122,15 @@ public class GrabbableObject : RaycastController
             StartCoroutine(FailDrop());
         }
 
-    }  
+    }
 
     public void ForceDrop()
     {
-        grabbed = false;
-        pointAttachedTo.Detach(this);
+        grabbed = false;       
         pointAttachedTo = null;
         sprite.sortingOrder++;
         gameObject.layer -= 1;
+        FailDrop();
     }
 
     public IEnumerator AttachToPlayer(AttachPoint attachPoint)

@@ -9,6 +9,7 @@ TagManager:
   - IngredientHolder
   - GameMaster
   - Score
+  - Witch
   layers:
   - Default
   - TransparentFX
