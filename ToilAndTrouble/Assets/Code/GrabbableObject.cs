@@ -12,7 +12,7 @@ public class GrabbableObject : RaycastController
     public float distanceToGrab = 2f;
     public LayerMask playerMask;
     public LayerMask grabbablesMask;
-    public LayerMask collisionsMask;
+    public LayerMask excludeGrabbed;
     public CollisionInfo collisions;
     public float gravity;
     SpriteRenderer sprite;
@@ -95,7 +95,7 @@ public class GrabbableObject : RaycastController
     {
         bool canDrop = true;
         Collider2D[] hit = new Collider2D[2];
-        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size - new Vector3 (0.1f,0.1f,0.1f), 0, hit, LayerMask.NameToLayer("Grababbles")) > 0)
+        if (Physics2D.OverlapBoxNonAlloc(collider.bounds.center, collider.bounds.size - new Vector3 (0.1f,0.1f,0.1f), 0, hit, excludeGrabbed) > 0)
         {
 
             foreach (Collider2D h in hit)

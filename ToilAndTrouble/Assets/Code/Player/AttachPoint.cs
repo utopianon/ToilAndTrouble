@@ -35,7 +35,7 @@ public class AttachPoint : MonoBehaviour
 
     public Vector2 FreeAttachPoint(GrabbableObject ingredient)
     {
-        if (attachedItems.Count == 0)
+        if (attachedItems.Count < 1)
         {
             attachedItems.Add(ingredient);
             Owner.heldItems++;
@@ -63,6 +63,10 @@ public class AttachPoint : MonoBehaviour
             unloading = true;
             StartCoroutine(Unload());
         }
+        else if (attachedItems.Count == 0)
+        {
+            Owner.activeAttachPoint = null;
+        }
 
     }
 
@@ -73,7 +77,7 @@ public class AttachPoint : MonoBehaviour
         {
             i.Drop();
         }
-        unloading = false;
+        unloading = false;        
         yield return null;
-    }
+    }    
 }

@@ -69,6 +69,7 @@ public class Player : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         attachPoints = GetComponentsInChildren<AttachPoint>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        GameMaster.Instance.SetPlayer(this);
 
         //calculate gravity and velocity from wanted jump height and time to peak
         gravity = -(2 * maxJumpHeight / Mathf.Pow(timeToJumpPeak, 2));
