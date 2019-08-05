@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Grabbable
+  - Ingredient
+  - IngredientHolder
+  - GameMaster
+  - Score
+  - Witch
   layers:
   - Default
   - TransparentFX
@@ -14,12 +20,12 @@ TagManager:
   - 
   - 
   - Ground
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Grabbables
+  - Grabbed
+  - Platforms
+  - Enemy
+  - SpecialGround
   - 
   - 
   - 

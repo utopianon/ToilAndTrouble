@@ -7,16 +7,15 @@ using UnityEngine.Events;
 public class CharacterController : RaycastController
 {
     [SerializeField] private float maxSlopeAngle = 80;
-    [SerializeField] private float maxDescendAngle = 75;
-
-    public bool colliding;
+    [SerializeField] private float maxDescendAngle = 75; 
 
     public CollisionInfo collisions;
 
     public override void Start()
     {
         base.Start();
-        colliding = true;
+
+        collisions.faceDir = -1;
     }
 
     public void Move(Vector3 velocity, bool standingOnPlatform = false)
@@ -25,17 +24,21 @@ public class CharacterController : RaycastController
         collisions.Reset();
         collisions.velocityOld = velocity;
 
+        if (velocity.x != 0)
+        {
+            collisions.faceDir = (int)Mathf.Sign(velocity.x);
+        }
+
         if (velocity.y < 0)
         {
             DescendSlope(ref velocity);
         }
 
-        if (velocity.x != 0 && colliding)
-            HorizontalCollisions(ref velocity);
-        if (velocity.y != 0 && colliding)
+        HorizontalCollisions(ref velocity);
+
+        //if (velocity.y != 0)
             VerticalCollisions(ref velocity);
 
-        
         transform.Translate(velocity);
 
         if (standingOnPlatform)
@@ -71,7 +74,7 @@ public class CharacterController : RaycastController
                 if (collisions.climbingSlope)
                 {
                     //if it collides with something above it while climbing a slope
-                    velocity.x = velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x); 
+                    velocity.x = velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
                 }
 
                 collisions.below = directionY == -1;
@@ -102,9 +105,13 @@ public class CharacterController : RaycastController
     void HorizontalCollisions(ref Vector3 velocity)
     {
         //check if moving up or down
-        float directionX = Mathf.Sign(velocity.x);
+        float directionX = collisions.faceDir;
         float rayLenght = Mathf.Abs(velocity.x) + skinWidth;
 
+        if (Mathf.Abs(velocity.x) < skinWidth)
+        {
+            rayLenght = 2 * skinWidth;
+        }
         //using rays to check collisions
         for (int i = 0; i < horizontalRayCount; i++)
         {
@@ -175,7 +182,6 @@ public class CharacterController : RaycastController
             collisions.below = true;
             collisions.climbingSlope = true;
             collisions.slopeAngle = slopeAngle;
-
         }
 
     }
@@ -214,7 +220,7 @@ public class CharacterController : RaycastController
         }
     }
 
-  
+
 
     //stores the directions character is colliding in
     public struct CollisionInfo
@@ -226,6 +232,7 @@ public class CharacterController : RaycastController
         public bool descendingSlope;
         public float slopeAngle, slopeAngleOld;
         public Vector3 velocityOld;
+        public int faceDir;
 
         public void Reset()
         {
