@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameMaster : MonoBehaviour
 {
@@ -49,16 +50,18 @@ public class GameMaster : MonoBehaviour
             Application.Quit();
         }
 
-            if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
         {
-            if (player.heldItems >0)
+            if (player.heldItems > 0)
             {
                 player.activeAttachPoint.attachedItems[0].Drop();
             }
         }
         scoreText.text = score.ToString();
-    }
 
+
+    }
+      
     public void SetPlayer(Player _player)
     {
         player = _player;
