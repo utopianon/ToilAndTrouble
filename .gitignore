@@ -34,3 +34,5 @@ sysinfo.txt
 *.unitypackage
 
 StraySheep/fmod_editor\.log
+
+ToilAndTrouble/Build/

@@ -44,11 +44,7 @@ public class GameMaster : MonoBehaviour
     }
 
     private void Update()
-    {
-            if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Application.Quit();
-        }
+    {        
 
         if (Input.GetMouseButtonDown(1))
         {
@@ -77,6 +73,12 @@ public class GameMaster : MonoBehaviour
     public void LoseScore(int value)
     {
         score = (score - value < 0) ? 0 : score - value;
+    }
+
+    private void OnLevelWasLoaded(int level)
+    {
+        if (level == 0)
+            Destroy(gameObject);
     }
 
     private void Reset()
