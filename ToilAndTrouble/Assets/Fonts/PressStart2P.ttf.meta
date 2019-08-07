@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3c726dc421934ad45b00847f2d3ad8d5
+guid: 6efc62e5d7c462941a6c70f371a50c25
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,12 +8,12 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Munro
+  fontName: Press Start 2P
   fontNames:
-  - Munro
+  - Press Start 2P
   fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 2
+  fontRenderingMode: 0
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1

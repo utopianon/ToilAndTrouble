@@ -95,6 +95,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (!PauseMenu.Paused)
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         //wall direction for the type of wall jump
         wallDirX = (controller.collisions.left) ? -1 : 1;
@@ -264,22 +265,6 @@ public class Player : MonoBehaviour
         spriteRenderer.color = Color.white;
         invincible = false;
     }
-
-    private IEnumerator DoFallJump()
-    {
-
-        while (velocity.y > 0)
-        {
-            yield return null;
-        }
-        gravity = gravity * jumpFallModifier;
-        while (!controller.collisions.below)
-        {
-            yield return null;
-
-        }
-        gravity = baseGravity;
-        yield return null;
-    }
+ 
 
 }

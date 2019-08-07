@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour
     public float speed;
     public float startWaitTime;
     public float waitTime;
+   
 
     public Transform[] waypoints;
     private int waypointIndex = 0;   
@@ -46,6 +47,12 @@ public class Enemy : MonoBehaviour
         }
         
     }  
+
+    public int VerticalDirection()
+    {
+        Vector2 direction =  waypoints[waypointIndex].position - transform.position;
+        return (int) Mathf.Sign(direction.y);
+    }
 
     public enum EnemyType
     {
