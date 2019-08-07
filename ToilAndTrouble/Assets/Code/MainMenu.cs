@@ -5,9 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-public void LoadScene(int scene)
+    public Texture2D cursorTexture;
+
+    private void Start()
     {
-        Debug.Log("foing this");
+        Vector2 cursorHotspot = new Vector2(cursorTexture.width / 2, cursorTexture.height / 2);
+        Cursor.SetCursor(cursorTexture, cursorHotspot, CursorMode.Auto);
+    }
+
+    public void LoadScene(int scene)
+    {
         SceneManager.LoadScene(scene);
     }
 

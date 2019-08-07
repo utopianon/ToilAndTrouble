@@ -443,6 +443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a013744004995ae429071006c878a8e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cursorTexture: {fileID: 2800000, guid: 98b9764cef8bd6c42aed488812162c3f, type: 3}
 --- !u!4 &1073549458
 Transform:
   m_ObjectHideFlags: 0
